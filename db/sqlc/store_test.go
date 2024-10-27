@@ -46,20 +46,20 @@ func TestTransferTx(t *testing.T) {
 		require.NotZero(t, transfer.ID)
 		require.NotZero(t, transfer.CreatedAt)
 
-		_, err = store.q.GetTransfer(context.Background(), transfer.ID)
+		_, err = store.Q.GetTransfer(context.Background(), transfer.ID)
 		require.NoError(t, err)
 
 		fromEntry := result.FromEntry
 		require.NotEmpty(t, fromEntry)
 
-		_, err = store.q.GetEntry(context.Background(), fromEntry.ID)
+		_, err = store.Q.GetEntry(context.Background(), fromEntry.ID)
 		require.NoError(t, err)
 
 		toEntry := result.ToEntry
 		require.NotEmpty(t, toEntry)
 		require.NotZero(t, toEntry.ID)
 
-		_, err = store.q.GetEntry(context.Background(), toEntry.ID)
+		_, err = store.Q.GetEntry(context.Background(), toEntry.ID)
 		require.NoError(t, err)
 
 		fromAccount := result.FromAccount
@@ -82,7 +82,7 @@ func TestTransferTx(t *testing.T) {
 
 	}
 
-	updatedAccount1, err := store.q.GetAccount(context.Background(), account1.ID)
+	updatedAccount1, err := store.Q.GetAccount(context.Background(), account1.ID)
 	require.NoError(t, err)
 
 	//updatedAccount2, err := store.q.GetAccount(context.Background(), account2.ID)
@@ -130,7 +130,7 @@ func TestTransferTxDeadLock(t *testing.T) {
 		require.NoError(t, err)
 	}
 
-	updatedAccount1, err := store.q.GetAccount(context.Background(), account1.ID)
+	updatedAccount1, err := store.Q.GetAccount(context.Background(), account1.ID)
 	require.NoError(t, err)
 
 	//updatedAccount2, err := store.q.GetAccount(context.Background(), account2.ID)

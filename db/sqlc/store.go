@@ -7,14 +7,14 @@ import (
 )
 
 type Store struct {
-	q  *Queries
+	Q  *Queries
 	db *pgxpool.Pool
 }
 
 func NewStore(db *pgxpool.Pool, q *Queries) *Store {
 	return &Store{
 		db: db,
-		q:  q,
+		Q:  q,
 	}
 }
 
@@ -43,7 +43,7 @@ func (s *Store) TransferTx(arg TransferTxParams) (TransferTxResult, error) {
 			return
 		}
 	}()
-	qtx := s.q.WithTx(tx)
+	qtx := s.Q.WithTx(tx)
 	fromID := pgtype.Int8{
 		Int64: arg.FromAccountID,
 		Valid: true,
