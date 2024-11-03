@@ -9,8 +9,9 @@ import (
 )
 
 func CreateRandomAccount(t *testing.T) Account {
+	user := CreateRandomUser(t)
 	owner := pgtype.Text{
-		String: util.RandomOwner(),
+		String: user.Username,
 		Valid:  true,
 	}
 	currency := pgtype.Text{

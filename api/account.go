@@ -1,10 +1,13 @@
 package api
 
 import (
+	"errors"
 	db "github.com/Darkhackit/simplebank/db/sqlc"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/lib/pq"
 	_ "github.com/lib/pq"
+	"log"
 	"net/http"
 	"strings"
 )
@@ -43,6 +46,10 @@ func (server *Server) createAccount(ctx *gin.Context) {
 
 	acct, err := server.q.CreateAccount(ctx, arg)
 	if err != nil {
+		var pgErr *pq.Error
+		if errors.As(err, &pgErr) {
+			log.Println(pgErr.Code.Name(), pgErr.Detail)
+		}
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}

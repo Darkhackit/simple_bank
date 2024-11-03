@@ -24,8 +24,10 @@ func main() {
 
 	queries := db.New(conn)
 
-	server := api.NewServer(queries)
-
+	server, err := api.NewServer(config, queries)
+	if err != nil {
+		log.Fatal(err)
+	}
 	err = server.Start(config.ServerAddr)
 	if err != nil {
 		log.Fatal(err)

@@ -2,26 +2,39 @@ package api
 
 import (
 	db "github.com/Darkhackit/simplebank/db/sqlc"
+	"github.com/Darkhackit/simplebank/token"
+	"github.com/Darkhackit/simplebank/util"
 	"github.com/gin-gonic/gin"
 )
 
 type Server struct {
-	q      *db.Queries
-	router *gin.Engine
+	q          *db.Queries
+	s          db.SQLStore
+	tokenMaker token.Maker
+	router     *gin.Engine
+	config     util.Config
 }
 
-func NewServer(store *db.Queries) *Server {
-
-	server := &Server{q: store}
+func NewServer(config util.Config, store *db.Queries) (*Server, error) {
+	tokenMaker, err := token.NewPasetoToken(config.TokenSymmetryKey)
+	if err != nil {
+		return nil, err
+	}
+	server := &Server{q: store, tokenMaker: tokenMaker, config: config}
 
 	router := gin.Default()
+	authRoutes := router.Group("/").Use(authMiddleware(tokenMaker))
 
-	router.POST("/accounts", server.createAccount)
-	router.GET("/accounts/:id", server.getAccount)
-	router.GET("/accounts", server.listAccounts)
+	authRoutes.POST("/accounts", server.createAccount)
+	authRoutes.GET("/accounts/:id", server.getAccount)
+	authRoutes.GET("/accounts", server.listAccounts)
+
+	authRoutes.POST("/transfers", server.createTransfer)
+	router.POST("/users", server.createUser)
+	router.POST("/login", server.loginUser)
 
 	server.router = router
-	return server
+	return server, nil
 }
 
 func errorResponse(err error) gin.H {
