@@ -13,3 +13,6 @@ sql:
               emit_interface: true
               emit_exact_table_names: true
               emit_empty_slices: true
+              overrides:
+                - db_type: "varchar"
+                  go_type: "string"

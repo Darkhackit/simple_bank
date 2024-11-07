@@ -36,11 +36,13 @@ func main() {
 
 }
 func runGrpcServer(config util.Config, queries *db.Queries) {
-	grpcServer := grpc.NewServer()
+
 	server, err := gapi.NewServer(config, queries)
 	if err != nil {
 		log.Fatal(err)
 	}
+	grpcLogger := grpc.UnaryInterceptor(gapi.GrpcLogger)
+	grpcServer := grpc.NewServer(grpcLogger)
 	pb.RegisterSimpleBankServer(grpcServer, server)
 	reflection.Register(grpcServer)
 

@@ -4,13 +4,19 @@ import (
 	"context"
 	db "github.com/Darkhackit/simplebank/db/sqlc"
 	"github.com/Darkhackit/simplebank/pb"
+	"github.com/Darkhackit/simplebank/val"
 	"github.com/jackc/pgx/v5/pgtype"
 	"golang.org/x/crypto/bcrypt"
+	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
 func (server *Server) LoginUser(ctx context.Context, req *pb.LoginUserRequest) (*pb.LoginUserResponse, error) {
+	violations := ValidLoginUserRequest(req)
+	if len(violations) > 0 {
+		return nil, invalidArgumentError(violations)
+	}
 
 	user, err := server.q.GetUser(ctx, req.GetUsername())
 	if err != nil {
@@ -47,4 +53,14 @@ func (server *Server) LoginUser(ctx context.Context, req *pb.LoginUserRequest) (
 		AccessToken: token,
 	}
 	return resp, nil
+}
+
+func ValidLoginUserRequest(req *pb.LoginUserRequest) (violations []*errdetails.BadRequest_FieldViolation) {
+	if err := val.ValidateUsername(req.GetUsername()); err != nil {
+		violations = append(violations, fieldViolation("username", err))
+	}
+	if err := val.ValidatePassword(req.GetPassword()); err != nil {
+		violations = append(violations, fieldViolation("password", err))
+	}
+	return
 }

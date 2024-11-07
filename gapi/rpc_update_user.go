@@ -13,37 +13,47 @@ import (
 	_ "net/http"
 )
 
-func (server *Server) CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*pb.CreateUserResponse, error) {
-	violations := ValidCreateUserRequest(req)
+func (server *Server) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest) (*pb.UpdateUserResponse, error) {
+	authPayload, err := server.authorizeUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if authPayload.Username != req.Username {
+		return nil, status.Error(codes.PermissionDenied, "permission denied")
+	}
+	violations := ValidUpdateUserRequest(req)
 	if len(violations) > 0 {
 		return nil, invalidArgumentError(violations)
 	}
 	name := pgtype.Text{
 		String: req.GetName(),
-		Valid:  true,
+		Valid:  req.GetName() != "",
 	}
-	active := pgtype.Bool{
-		Bool:  req.GetActive(),
-		Valid: true,
+	email := pgtype.Text{
+		String: req.GetEmail(),
+		Valid:  req.GetEmail() != "",
 	}
 	password, err := util.HashPassword(req.GetPassword())
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "Failed to hash password: %v", err)
 	}
-	arg := db.CreateUserParams{
+	p := pgtype.Text{
+		String: password,
+		Valid:  true,
+	}
+	arg := db.UpdateUserParams{
 		Name:     name,
 		Username: req.GetUsername(),
-		Password: password,
-		Email:    req.GetEmail(),
-		Active:   active,
+		Password: p,
+		Email:    email,
 	}
 
-	user, err := server.q.CreateUser(ctx, arg)
+	user, err := server.q.UpdateUser(ctx, arg)
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "Failed to created user: %v", err)
+		return nil, status.Errorf(codes.Internal, "Failed to Update user: %v", err)
 	}
 
-	response := &pb.CreateUserResponse{
+	response := &pb.UpdateUserResponse{
 		User: &pb.User{
 			Username: user.Username,
 			Email:    user.Email,
@@ -53,7 +63,7 @@ func (server *Server) CreateUser(ctx context.Context, req *pb.CreateUserRequest)
 	return response, nil
 }
 
-func ValidCreateUserRequest(req *pb.CreateUserRequest) (violations []*errdetails.BadRequest_FieldViolation) {
+func ValidUpdateUserRequest(req *pb.UpdateUserRequest) (violations []*errdetails.BadRequest_FieldViolation) {
 	if err := val.ValidateUsername(req.GetUsername()); err != nil {
 		violations = append(violations, fieldViolation("username", err))
 	}

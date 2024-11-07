@@ -2,11 +2,11 @@ CREATE TABLE "users" (
      "id" bigserial PRIMARY KEY ,
      "email" varchar UNIQUE NOT NULL ,
      "username" varchar UNIQUE NOT NULL ,
-     "active" boolean,
-     "name" varchar,
+     "active" boolean  ,
+     "name" varchar  ,
      "password" varchar NOT NULL ,
-     "password_changed_at" timestamp DEFAULT (now()),
-     "created_at" timestamp DEFAULT (now())
+     "password_changed_at" timestamp DEFAULT (now()) ,
+     "created_at" timestamp DEFAULT (now()) 
 );
 CREATE INDEX ON "users" ("id");
 

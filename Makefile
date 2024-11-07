@@ -15,7 +15,7 @@ sqlc:
 proto:
    rm -f pb/*.go
    rm -f docs/swagger/*.swagger.json
-   protoc --proto_path=proto --go_out=./pb --go_opt=paths=source_relative --go-grpc_out=./pb --go-grpc_opt=paths=source_relative proto/*.proto  --grpc-gateway_out=pb --grpc-gateway_opt paths=source_relative --openapiv2_out=docs/swagger --openpiv2_opt=allow_merge=true,merge_file_name=simple_bank
+   protoc --proto_path=proto --go_out=./pb --go_opt=paths=source_relative --go-grpc_out=./pb --go-grpc_opt=paths=source_relative proto/*.proto  --grpc-gateway_out=pb --grpc-gateway_opt paths=source_relative --openapiv2_out=docs/swagger
 evans:
    evans --host localhost --port 8082 -r repl
 test:
