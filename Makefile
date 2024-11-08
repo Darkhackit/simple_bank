@@ -22,4 +22,6 @@ test:
     go test -v -cover ./...
 server:
     gp run main.go
-.PHONY:createdb dropdb migrateup migratedown sqlc test server proto evans
+redis:
+    docker run --name redis -p 6379:6379 -d redis:8.0-M02-alpine
+.PHONY:createdb dropdb migrateup migratedown sqlc test server proto evans redis
